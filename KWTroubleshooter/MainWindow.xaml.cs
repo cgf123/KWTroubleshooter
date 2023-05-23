@@ -324,6 +324,7 @@ namespace KWTroubleshooter
                                 }
                                 else
                                 {
+                                    this.SetFullControlPermissionsToEveryone(gamePath);
                                     this.WriteOutput(string.Format(format, (object)"OK"));
                                     this.GetDocsPath();
                                     this.CheckLeaf(key);
@@ -890,20 +891,48 @@ namespace KWTroubleshooter
 
         private void SetFullControlPermissionsToEveryone(string path)
         {
-            SecurityIdentifier identity = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, (SecurityIdentifier)null);
+            var wellKnownType = WellKnownSidType.BuiltinUsersSid;
+            SecurityIdentifier identity = new SecurityIdentifier(wellKnownType, null);
+
+            FileSystemAccessRule systemAccessRule1 = new FileSystemAccessRule(identity, FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow);
+            FileSystemAccessRule systemAccessRule3 = new FileSystemAccessRule(identity, FileSystemRights.Write, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Deny);
+
+            DoSetPermissions(path, new FileSystemAccessRule[] { systemAccessRule1 }, new FileSystemAccessRule[] { systemAccessRule3 }, true, 3);
+
+        }
+
+        static private void DoSetPermissions(string path, FileSystemAccessRule[] rulesToAdd, FileSystemAccessRule[] rulesToRemove, bool writeLog, int maxLevel)
+        {
             DirectoryInfo directoryInfo = new DirectoryInfo(path);
             DirectorySecurity accessControl = directoryInfo.GetAccessControl(AccessControlSections.Access);
-            foreach (AccessRule accessRule in (ReadOnlyCollectionBase)accessControl.GetAccessRules(true, true, typeof(SecurityIdentifier)))
+            if (writeLog)
+                Console.WriteLine($"{path}:");
+
+            if (rulesToAdd != null)
             {
-                if (accessRule is FileSystemAccessRule)
+                foreach (var rule in rulesToAdd)
                 {
-                    FileSystemAccessRule systemAccessRule = (FileSystemAccessRule)accessRule;
-                    this.WriteOutput(systemAccessRule.IdentityReference.Translate(typeof(SecurityIdentifier))?.ToString() + " = " + systemAccessRule.AccessControlType.ToString());
+                    accessControl.AddAccessRule(rule);
+                    if (writeLog)
+                        Console.WriteLine($"\tADDED RULE: {rule.FileSystemRights}: {rule.AccessControlType}");
                 }
             }
-            FileSystemAccessRule systemAccessRule1 = new FileSystemAccessRule((IdentityReference)identity, FileSystemRights.FullControl, InheritanceFlags.None, PropagationFlags.NoPropagateInherit, AccessControlType.Allow);
-            FileSystemAccessRule systemAccessRule2 = new FileSystemAccessRule((IdentityReference)identity, FileSystemRights.Write, InheritanceFlags.None, PropagationFlags.NoPropagateInherit, AccessControlType.Deny);
+            if (rulesToRemove != null)
+            {
+                foreach (var rule in rulesToRemove)
+                {
+                    if (accessControl.RemoveAccessRule(rule) && writeLog)
+                    {
+                        Console.WriteLine($"\tREMOVED RULE: {rule.FileSystemRights}: {rule.AccessControlType}");
+                    }
+                }
+            }
             directoryInfo.SetAccessControl(accessControl);
+
+            if (maxLevel > 0)
+            {
+                Directory.GetDirectories(path).ToList().ForEach(f => DoSetPermissions(f, null, rulesToRemove, false, maxLevel - 1));
+            }
         }
 
         private RegistryKey GetLocalMachineKey()
