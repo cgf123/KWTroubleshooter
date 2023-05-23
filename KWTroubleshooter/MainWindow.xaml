@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KWTroubleshooter"
         mc:Ignorable="d"
-        Title="KW Troubleshooter" Height="350" Width="400" ResizeMode="NoResize" ContentRendered="Window_ContentRendered">
+        Title="KW Troubleshooter" Height="400" Width="400" ResizeMode="NoResize" ContentRendered="Window_ContentRendered">
     <Grid Background="GhostWhite">
         <Grid Margin="5">
             <Grid.ColumnDefinitions>
@@ -17,6 +17,7 @@
                 <RowDefinition Height="40" />
                 <RowDefinition Height="1*" />
                 <RowDefinition x:Name="rowInput" Height="90" />
+                <RowDefinition x:Name="rowClose" Height="30" />
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Text="Kane Edition Skins" VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Left" />
@@ -40,9 +41,10 @@
                 <TextBlock x:Name="tb_msg" Grid.ColumnSpan="2" FontWeight="Bold" Foreground="Red" VerticalAlignment="Center" TextAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap"
                        Text="Please Select KW Folder. " />
                 <TextBox Grid.Row="1" x:Name="tb_input" IsReadOnly="True" Text="Some path." IsReadOnlyCaretVisible="True" Foreground="Gray" HorizontalAlignment="Stretch" />
-                <Button x:Name="btn_browse" Grid.Row="1" Grid.Column="1" Content="Browse" FontWeight="Bold" />
-                <Button x:Name="btn_ok" Grid.Row="2" Grid.ColumnSpan="2" Content="OK" FontWeight="Bold" Width="175" HorizontalAlignment="Center" VerticalAlignment="Center" Click="btn_ok_Click" />
+                <Button Grid.Row="1" Grid.Column="1" Content="Browse" FontWeight="Bold" />
+                <Button Grid.Row="2" Grid.ColumnSpan="2" Content="OK" FontWeight="Bold" Width="175" HorizontalAlignment="Center" VerticalAlignment="Center" Click="btn_ok_Click" />
             </Grid>
+            <Button Grid.Row="4" Grid.ColumnSpan="2" Content="Close" FontWeight="Bold" Width="175" HorizontalAlignment="Center" VerticalAlignment="Center" Click="btn_close_Click" />
         </Grid>
     </Grid>
 </Window>

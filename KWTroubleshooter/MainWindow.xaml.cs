@@ -105,6 +105,7 @@ namespace KWTroubleshooter
         {
             MainWindow mainWindow = this;
             rowInput.Height = new GridLength(0);
+            rowClose.Height = new GridLength(0);
 
             mainWindow.btn_enable_kane.IsEnabled = false;
             mainWindow.ToggleKaneSkins(false);
@@ -112,6 +113,9 @@ namespace KWTroubleshooter
             mainWindow.comboBox_lang.IsEnabled = false;
 
             await Task.Run(() => RunAllTasks());
+
+            rowClose.Height = new GridLength(30);
+            tb_output.ScrollToEnd();
 
             mainWindow.btn_enable_kane.IsEnabled = true;
             mainWindow.ToggleKaneSkins(mainWindow.isKaneEnabled);
@@ -1169,6 +1173,11 @@ namespace KWTroubleshooter
             .Next(s.Length)])).ToArray<char>());
 
         private void btn_ok_Click(object sender, RoutedEventArgs e) => MainWindow.inputTxt = this.tb_input.Text;
+
+        private void btn_close_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
 
         private void btn_browse_Click(object sender, RoutedEventArgs e)
         {
