@@ -65,10 +65,10 @@ namespace KWTroubleshooter
         };
 
         private static string DOCS_PATH = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-        private const string strSelectKW = "Please select KW folder.";
+        private const string strSelectKW = "Please select KW installation directory.";
         private const string strInvalidDir = "Please select a valid directory.";
-        private const string strInvalidKWDir = "Invalid KW directory. Please select the correct folder.";
-        private const string strInvalidTWDir = "Invalid TW directory. Either select the correct TW directory, or create a new directory to use as your dummy TW directory.";
+        private const string strInvalidKWDir = "Invalid KW (C&C3 Kane's Wrath) directory. Please select the correct folder.\n\nNote: A valid KW folder would contain cnc3ep1.exe.";
+        private const string strInvalidTWDir = "Invalid TW (C&C3 Tiberium Wars) directory. Either select the correct TW directory, or create a new directory to use as your dummy TW directory.";
         private const string strPathAccessDenied = "Failed to access path! Please select a different directory.";
         private const string strSelectTW = "Please select path for installing dummy TW.";
         private static Random random = new Random();
@@ -648,31 +648,31 @@ namespace KWTroubleshooter
                     if (registryKey != null)
                     {
                         this.WriteOutput("Reading Reg Path...\n" + registryKey.Name);
-                        string str2 = (string)null;
+                        string twGamePath = (string)null;
                         try
                         {
                             object obj = registryKey.GetValue("InstallPath");
                             if (!string.IsNullOrWhiteSpace((string)obj))
-                                str2 = obj as string;
+                                twGamePath = obj as string;
                         }
                         catch (Exception ex)
                         {
                             this.WriteOutput(ex.Message);
                         }
-                        if (string.IsNullOrWhiteSpace(str2))
+                        if (string.IsNullOrWhiteSpace(twGamePath))
                         {
                             this.WriteOutput(string.Format(format, (object)"FAILED => Value not found!"));
-                            string twGamePath = this.OpenInputPanel(strSelectTW, (string)null, new Func<bool>(this.ValidateInputForTWFolderSelection));
+                            twGamePath = this.OpenInputPanel(strSelectTW, (string)null, new Func<bool>(this.ValidateInputForTWFolderSelection));
                             this.CreateDummyTWKey(str1, twGamePath);
                         }
-                        else if (Directory.Exists(str2))
+                        else if (Directory.Exists(twGamePath))
                         {
                             foreach (string twFile in MainWindow.twFiles)
                             {
-                                if (!File.Exists(str2 + twFile))
+                                if (!File.Exists(twGamePath + twFile))
                                 {
                                     this.WriteOutput(string.Format(format, (object)"FAILED => Missing files!"));
-                                    this.CreateDummyTWFiles(str2);
+                                    this.CreateDummyTWFiles(twGamePath);
                                     return;
                                 }
                             }
@@ -681,7 +681,7 @@ namespace KWTroubleshooter
                         else
                         {
                             this.WriteOutput(string.Format(format, (object)"FAILED => Directory not found!"));
-                            this.CreateDummyTWFiles(this.OpenInputPanel(strSelectTW, str2, new Func<bool>(this.ValidateInputForTWFolderSelection)));
+                            this.CreateDummyTWFiles(twGamePath);
                         }
                     }
                     else
