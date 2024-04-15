@@ -5,46 +5,76 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KWTroubleshooter"
         mc:Ignorable="d"
-        Title="KW Troubleshooter" Height="400" Width="400" ResizeMode="NoResize" ContentRendered="Window_ContentRendered">
+        Title="KW Troubleshooter" Height="400" Width="650" ResizeMode="NoResize" ContentRendered="Window_ContentRendered">
     <Grid Background="GhostWhite">
         <Grid Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" />
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height="1*" />
-                <RowDefinition x:Name="rowInput" Height="90" />
-                <RowDefinition x:Name="rowClose" Height="30" />
-            </Grid.RowDefinitions>
-
-            <TextBlock Grid.Row="0" Text="Kane Edition Skins" VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Left" />
-            <Button Grid.Row="0" Grid.Column="1" x:Name="btn_enable_kane" VerticalAlignment="Center" FontWeight="Bold" Content="Enabled" Click="btn_enable_kane_Click" />
-
-            <TextBlock Grid.Row="1" Text="Game Language" VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Left" />
-            <ComboBox x:Name="comboBox_lang" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Center" SelectionChanged="comboBox_lang_SelectionChanged" />
-
-            <TextBox Grid.Row="2" Grid.ColumnSpan="2" x:Name="tb_output" IsReadOnly="True" IsReadOnlyCaretVisible="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" />
-
-            <Grid Grid.Row="3" Grid.ColumnSpan="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="20" />
-                    <RowDefinition Height="30" />
-                </Grid.RowDefinitions>
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="75" />
+                    <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock x:Name="tb_msg" Grid.ColumnSpan="2" FontWeight="Bold" Foreground="Red" VerticalAlignment="Center" TextAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap"
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0" />
+                    <RowDefinition Height="0" />
+                    <RowDefinition Height="0" />
+                    <RowDefinition Height="1*" />
+                    <RowDefinition x:Name="rowInput" Height="90" />
+                    <RowDefinition x:Name="rowClose" Height="30" />
+                </Grid.RowDefinitions>
+
+                <TextBox Grid.Row="3" Grid.ColumnSpan="2" x:Name="tb_output" IsReadOnly="True" IsReadOnlyCaretVisible="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" />
+
+                <Grid Grid.Row="4" Grid.ColumnSpan="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="20" />
+                        <RowDefinition Height="30" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="75" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="tb_msg" Grid.ColumnSpan="2" FontWeight="Bold" Foreground="Red" VerticalAlignment="Center" TextAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap"
                        Text="Please Select KW Folder. " />
-                <TextBox Grid.Row="1" x:Name="tb_input" IsReadOnly="True" Text="Some path." IsReadOnlyCaretVisible="True" Foreground="Gray" HorizontalAlignment="Stretch" />
-                <Button Grid.Row="1" Grid.Column="1" Content="Browse" FontWeight="Bold" Click="btn_browse_Click" />
-                <Button Grid.Row="2" Grid.ColumnSpan="2" Content="OK" FontWeight="Bold" Width="175" HorizontalAlignment="Center" VerticalAlignment="Center" Click="btn_ok_Click" />
+                    <TextBox Grid.Row="1" x:Name="tb_input" IsReadOnly="True" Text="Some path." IsReadOnlyCaretVisible="True" Foreground="Gray" HorizontalAlignment="Stretch" />
+                    <Button Grid.Row="1" Grid.Column="1" Content="Browse" FontWeight="Bold" Click="btn_browse_Click" />
+                    <Button Grid.Row="2" Grid.ColumnSpan="2" Content="OK" FontWeight="Bold" Width="175" HorizontalAlignment="Center" VerticalAlignment="Center" Click="btn_ok_Click" />
+                </Grid>
+                <Button Grid.Row="5" Grid.ColumnSpan="2" Content="Close" FontWeight="Bold" Width="175" HorizontalAlignment="Center" VerticalAlignment="Center" Click="btn_close_Click" />
             </Grid>
-            <Button Grid.Row="4" Grid.ColumnSpan="2" Content="Close" FontWeight="Bold" Width="175" HorizontalAlignment="Center" VerticalAlignment="Center" Click="btn_close_Click" />
+
+            <Grid Grid.Column="1" Margin="10,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.ColumnSpan="2" TextDecorations="Underline" Text="Game Options" VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Center" />
+
+                <TextBlock Grid.Row="1" Text="Kane Edition Skins" VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Left" />
+                <Button Grid.Row="1" Grid.Column="1" x:Name="btn_enable_kane" VerticalAlignment="Center" FontWeight="Bold" Content="Enabled" Click="btn_enable_kane_Click" />
+
+                <TextBlock Grid.Row="2" Text="Game Language" VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Left" />
+                <ComboBox x:Name="comboBox_lang" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Center" SelectionChanged="comboBox_lang_SelectionChanged" />
+
+                <TextBlock Grid.Row="3" Grid.ColumnSpan="2" TextDecorations="Underline" Text="Command Post Options" VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Center" />
+
+                <Button x:Name="btn_fix_winmnmngt" Grid.Row="4" Grid.ColumnSpan="2" Content="Fix 'Illegal Access' Error" VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Stretch" 
+                    ToolTip="Fixes Command Post 'Illegal Access' error" Click="btn_fix_winmnmgt_Click" />
+
+            </Grid>
+
         </Grid>
     </Grid>
 </Window>

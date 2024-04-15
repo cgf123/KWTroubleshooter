@@ -13,6 +13,7 @@ using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace KWTroubleshooter
 {
@@ -99,7 +100,51 @@ namespace KWTroubleshooter
             this.btn_enable_kane.IsEnabled = true;
         }
 
+        private async void btn_fix_winmnmgt_Click(object sender, RoutedEventArgs e)
+        {
+            btn_fix_winmnmngt.IsEnabled = false;
+            var content = btn_fix_winmnmngt.Content;
+            btn_fix_winmnmngt.Content = "Resolving...";
+            await Task.Run(() =>
+            {
+                ExecuteCmd("sc", "config winmgmt start=auto");
+                ExecuteCmd("winmgmt", "/salvagerepository");
+            });
+            btn_fix_winmnmngt.IsEnabled = true;
+            btn_fix_winmnmngt.Content = content;
+        }
+
+        private void ExecuteCmd(string command, string arguments)
+        {
+            Process process = new Process();
+            process.StartInfo.FileName = command;
+            process.StartInfo.Arguments = arguments;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.Start();
+            process.WaitForExit();
+            Console.WriteLine(process.StandardOutput.ReadToEnd());
+        }
+
         private void btn_run_troubleshooter_Click(object sender, RoutedEventArgs e) => this.StartTroubleshooterTask();
+
+        private void ToggleEnableUI(bool enable)
+        {
+            if (enable)
+            {
+                btn_enable_kane.IsEnabled = true;
+                ToggleKaneSkins(isKaneEnabled);
+                comboBox_lang.IsEnabled = true;
+                SelectLang(curLang);
+                btn_fix_winmnmngt.IsEnabled = true;
+            } else
+            {
+                btn_enable_kane.IsEnabled = false;
+                ToggleKaneSkins(false);
+                comboBox_lang.IsEnabled = false;
+                btn_fix_winmnmngt.IsEnabled = false;
+            }
+        }
 
         private async void StartTroubleshooterTask()
         {
@@ -107,20 +152,14 @@ namespace KWTroubleshooter
             rowInput.Height = new GridLength(0);
             rowClose.Height = new GridLength(0);
 
-            mainWindow.btn_enable_kane.IsEnabled = false;
-            mainWindow.ToggleKaneSkins(false);
-
-            mainWindow.comboBox_lang.IsEnabled = false;
+            ToggleEnableUI(false);
 
             await Task.Run(() => RunAllTasks());
 
             rowClose.Height = new GridLength(30);
             tb_output.ScrollToEnd();
 
-            mainWindow.btn_enable_kane.IsEnabled = true;
-            mainWindow.ToggleKaneSkins(mainWindow.isKaneEnabled);
-            mainWindow.comboBox_lang.IsEnabled = true;
-            mainWindow.SelectLang(mainWindow.curLang);
+            ToggleEnableUI(true);
         }
 
         private void RunAllTasks()
@@ -1256,6 +1295,7 @@ namespace KWTroubleshooter
                 this.type = type;
             }
         }
+
     }
 }
 
