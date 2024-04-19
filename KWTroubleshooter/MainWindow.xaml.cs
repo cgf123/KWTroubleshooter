@@ -14,6 +14,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Reflection;
+using System.IO.Compression;
 
 namespace KWTroubleshooter
 {
@@ -65,6 +67,11 @@ namespace KWTroubleshooter
             "thai",
         };
 
+        private const string launcherFixZip = "cnc3ep1.zip";
+
+        private readonly string[] CMD1 = new string[] { "sc", "config winmgmt start=auto" };
+        private readonly string[] CMD2 = new string[] { "winmgmt", "/salvagerepository" };
+
         private static string DOCS_PATH = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         private const string strSelectKW = "Please select KW installation directory.";
         private const string strInvalidDir = "Please select a valid directory.";
@@ -79,6 +86,8 @@ namespace KWTroubleshooter
         private static string inputTxt;
         private bool isKaneEnabled;
         private string curLang;
+
+        private string myGamePath;
 
         public MainWindow()
         {
@@ -102,16 +111,20 @@ namespace KWTroubleshooter
 
         private async void btn_fix_winmnmgt_Click(object sender, RoutedEventArgs e)
         {
+            WriteOutput("Restarting winmnmgt service to resolve access errors...");
+
             btn_fix_winmnmngt.IsEnabled = false;
             var content = btn_fix_winmnmngt.Content;
             btn_fix_winmnmngt.Content = "Resolving...";
             await Task.Run(() =>
             {
-                ExecuteCmd("sc", "config winmgmt start=auto");
-                ExecuteCmd("winmgmt", "/salvagerepository");
+                ExecuteCmd(CMD1[0], CMD1[1]);
+                ExecuteCmd(CMD2[0], CMD2[1]);
             });
             btn_fix_winmnmngt.IsEnabled = true;
             btn_fix_winmnmngt.Content = content;
+
+            WriteOutput("Successfully reset winmnmgt service. If you still see 'Illegal Access' errors on Command Post, please contact the admin.");
         }
 
         private void ExecuteCmd(string command, string arguments)
@@ -126,6 +139,79 @@ namespace KWTroubleshooter
             Console.WriteLine(process.StandardOutput.ReadToEnd());
         }
 
+        private async void btn_fix_launch_Click(object sender, RoutedEventArgs e)
+        {
+            var gamePath = myGamePath;
+            if (!string.IsNullOrWhiteSpace(gamePath))
+            {
+                WriteOutput("Fixing Game launch...");
+
+                btn_fix_launch.IsEnabled = false;
+                var content = btn_fix_launch.Content;
+                btn_fix_launch.Content = "Resolving...";
+                var ex = await Task.Run(() =>
+                {
+                    try
+                    {
+                        var resFile = Path.Combine(gamePath, launcherFixZip);
+                        var assembly = Assembly.GetExecutingAssembly();
+                        var resNames = assembly.GetManifestResourceNames();
+                        var resName = resNames.Where(p => p.EndsWith(launcherFixZip)).FirstOrDefault();
+                        var resStream = assembly.GetManifestResourceStream(resName);
+                        using (var fs = new FileStream(resFile, FileMode.Create))
+                        {
+                            ZipArchive archive = new ZipArchive(resStream);
+                            foreach (var entry in archive.Entries)
+                            {
+                                if (entry.Length == 0) continue;
+                                var outFile = Path.Combine(gamePath, entry.FullName).Replace("/", "\\");
+                                var backupFile = outFile + ".backup";
+
+                                // Create backup if not exists
+                                if (!File.Exists(backupFile) && File.Exists(outFile))
+                                {
+                                    File.Move(outFile, backupFile);
+                                }
+
+                                using (var fs1 = entry.Open())
+                                {
+                                    //WriteOutput("Fixing: " + outFile);
+                                    WriteStreamToFile(outFile, fs1);
+                                }
+                            }
+                        }
+                        return null;
+                    } catch (Exception ex1)
+                    {
+                        return ex1;
+                    }
+                });
+                btn_fix_launch.IsEnabled = true;
+                btn_fix_launch.Content = content;
+                if (ex == null)
+                {
+                    WriteOutput("Successfully applied Game launch fix.");
+                } else
+                {
+                    WriteOutput("Failed to apply Game launch fix: " + ex.Message);
+                }
+            }
+        }
+
+        private void WriteStreamToFile(string filePath, Stream inputStream)
+        {
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+            {
+                byte[] buffer = new byte[1024];
+
+                int bytesRead;
+                while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    fileStream.Write(buffer, 0, bytesRead);
+                }
+            }
+        }
+
         private void btn_run_troubleshooter_Click(object sender, RoutedEventArgs e) => this.StartTroubleshooterTask();
 
         private void ToggleEnableUI(bool enable)
@@ -137,12 +223,14 @@ namespace KWTroubleshooter
                 comboBox_lang.IsEnabled = true;
                 SelectLang(curLang);
                 btn_fix_winmnmngt.IsEnabled = true;
+                btn_fix_launch.IsEnabled = true;
             } else
             {
                 btn_enable_kane.IsEnabled = false;
                 ToggleKaneSkins(false);
                 comboBox_lang.IsEnabled = false;
                 btn_fix_winmnmngt.IsEnabled = false;
+                btn_fix_launch.IsEnabled = false;
             }
         }
 
@@ -367,6 +455,7 @@ namespace KWTroubleshooter
                                 }
                                 else
                                 {
+                                    this.myGamePath = gamePath;
                                     this.SetFullControlPermissionsToEveryone(gamePath);
                                     this.WriteOutput(string.Format(format, (object)"OK"));
                                     this.GetDocsPath();
