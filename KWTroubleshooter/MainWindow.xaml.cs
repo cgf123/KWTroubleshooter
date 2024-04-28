@@ -69,8 +69,9 @@ namespace KWTroubleshooter
 
         private const string launcherFixZip = "cnc3ep1.zip";
 
-        private readonly string[] CMD1 = new string[] { "sc", "config winmgmt start=auto" };
-        private readonly string[] CMD2 = new string[] { "winmgmt", "/salvagerepository" };
+        private readonly string[] CMD_SERVICE = new string[] { "sc", "config winmgmt start=auto" };
+        private readonly string[] CMD_REPO_SALVAGE = new string[] { "winmgmt", "/salvagerepository" };
+        private readonly string[] CMD_REPO_RESET = new string[] { "winmgmt", "/resetrepository" };
 
         private static string DOCS_PATH = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         private const string strSelectKW = "Please select KW installation directory.";
@@ -79,6 +80,7 @@ namespace KWTroubleshooter
         private const string strInvalidTWDir = "Invalid TW (C&C3 Tiberium Wars) directory. Either select the correct TW directory, or create a new directory to use as your dummy TW directory.";
         private const string strPathAccessDenied = "Failed to access path! Please select a different directory.";
         private const string strSelectTW = "Please select path for installing dummy TW.";
+        private const string strWinmgmt = "'Illegal Access' errors on Command Post are caused by problems with the Windows Management (Winmgmt) service. This can be fixed by reseting the Winmgmt service and repositories.\n\nWould you like to perform a FULL reset? This is more likely to fix errors.\n\nClick YES for a FULL reset, and NO for a partial reset.";
         private static Random random = new Random();
 
         public int bottomHt { get; set; }
@@ -109,7 +111,20 @@ namespace KWTroubleshooter
             this.btn_enable_kane.IsEnabled = true;
         }
 
-        private async void btn_fix_winmnmgt_Click(object sender, RoutedEventArgs e)
+        private void btn_fix_winmnmgt_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = System.Windows.MessageBox.Show(strWinmgmt, "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                DoRunCmds(CMD_REPO_RESET);
+            }
+            else if (result == MessageBoxResult.No)
+            {
+                DoRunCmds(CMD_REPO_SALVAGE);
+            }
+        }
+
+        private async void DoRunCmds(string[] cmdForRepo)
         {
             WriteOutput("Restarting winmnmgt service to resolve access errors...");
 
@@ -118,8 +133,8 @@ namespace KWTroubleshooter
             btn_fix_winmnmngt.Content = "Resolving...";
             await Task.Run(() =>
             {
-                ExecuteCmd(CMD1[0], CMD1[1]);
-                ExecuteCmd(CMD2[0], CMD2[1]);
+                ExecuteCmd(CMD_SERVICE[0], CMD_SERVICE[1]);
+                ExecuteCmd(cmdForRepo[0], cmdForRepo[1]);
             });
             btn_fix_winmnmngt.IsEnabled = true;
             btn_fix_winmnmngt.Content = content;
